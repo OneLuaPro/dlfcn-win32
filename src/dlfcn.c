@@ -754,8 +754,10 @@ static BOOL is_import_thunk( const void *addr )
         && ( opCode2 & 0xffe003ff ) == 0xf9400210  /* ldr  x16, [x16, offset] */
         && opCode3 == 0xd61f0200                   /* br   x16 */
         ? TRUE : FALSE;
-#else
+#elif defined(_M_AMD64) || defined(_M_IX86) || defined(__x86_64__) || defined(__i386__)
     return *(USHORT *) addr == 0x25ff ? TRUE : FALSE;
+#else
+    return FALSE;
 #endif
 }
 
@@ -785,7 +787,7 @@ static void *get_address_from_import_address_table( void *iat, DWORD iat_size, c
 
     /* Calculate the final address */
     BYTE *ptr = (BYTE *) ( (ULONG64) thkp & ~0xfffull ) + page + offset;
-#else
+#elif defined(_M_AMD64) || defined(_M_IX86) || defined(__x86_64__) || defined(__i386__)
     /* Get offset from thunk table (after instruction 0xff 0x25)
      *   4018c8 <_VirtualQuery>: ff 25 4a 8a 00 00
      */
@@ -804,6 +806,8 @@ static void *get_address_from_import_address_table( void *iat, DWORD iat_size, c
      */
     BYTE *ptr = (BYTE *) offset;
 #endif
+#else
+    return NULL;
 #endif
 
     if( !is_valid_address( ptr ) || ptr < (BYTE *) iat || ptr > (BYTE *) iat + iat_size )

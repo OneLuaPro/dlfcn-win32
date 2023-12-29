@@ -140,6 +140,7 @@ __declspec(dllexport)
 #endif
 int main(int argc, char **argv)
 {
+#ifdef _WIN32
 #if defined(_M_ARM64) || defined(__aarch64__)
     /* points to non reachable address */
     unsigned char zero_thunk_address[12] = { 0x10, 0x00, 0x00, 0x90, 0x10, 0x02, 0x40, 0xF9, 0x00, 0x02, 0x1F, 0xD6 };
@@ -147,13 +148,16 @@ int main(int argc, char **argv)
     unsigned char invalid_thunk_address[12] = { 0x10, 0x00, 0x00, 0xb0, 0x10, 0x06, 0x47, 0xF9, 0x00, 0x02, 0x1F, 0xD6 };
     /* no import thunk */
     unsigned char no_import_thunk[12] = { 0x11, 0x00, 0x00, 0xb0, 0x31, 0x06, 0x47, 0xF9, 0x20, 0x02, 0x1F, 0xD6 };
-#else
+#elif defined(_M_AMD64) || defined(_M_IX86) || defined(__x86_64__) || defined(__i386__)
     /* points to non reachable address */
     unsigned char zero_thunk_address[6] = { 0xFF, 0x25, 0x00, 0x00, 0x00, 0x00 };
     /* points to executable base */
     unsigned char invalid_thunk_address[6] = { 0xFF, 0x25, 0x00, 0x00, 0x40, 0x00 };
     /* no import thunk */
     unsigned char no_import_thunk[6] = { 0xFF, 0x26, 0x00, 0x00, 0x40, 0x00 };
+#else
+#error "thunk test cases are not defined for this architecture"
+#endif
 #endif
     int  result = 0;
     UNUSED(argv);
@@ -169,11 +173,12 @@ int main(int argc, char **argv)
     result |= check_dladdr( "function from executable", (void*)main, "main", Pass );
     result |= check_dladdr( "static function from executable", (void*)print_dl_info, "print_dl_info", Fail );
     result |= check_dladdr( "address with positive offset", ((char*)atoi)+1, "atoi", PassWithDifferentAddress );
+
+#ifdef _WIN32
     result |= check_dladdr( "zero address from import thunk", zero_thunk_address, "", NoInfo );
     result |= check_dladdr( "invalid address from import thunk", invalid_thunk_address, "", NoInfo );
     result |= check_dladdr( "no import thunk", no_import_thunk, "", NoInfo );
 
-#ifdef _WIN32
     result |= check_dladdr( "last entry in iat", (void*)VirtualQuery, "VirtualQuery", PassWithDifferentAddress );
 
     result |= check_dladdr ( "address through import thunk", (void*)GetModuleHandleA, "GetModuleHandleA", PassWithDifferentAddress );
