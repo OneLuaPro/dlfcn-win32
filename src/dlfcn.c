@@ -314,6 +314,7 @@ static BOOL MyEnumProcessModules( HANDLE hProcess, HMODULE *lphModule, DWORD cb,
     static BOOL (WINAPI *EnumProcessModulesPtr)(HANDLE, HMODULE *, DWORD, LPDWORD) = NULL;
     static BOOL failed = FALSE;
     UINT uMode;
+    HMODULE kernel32;
     HMODULE psapi;
 
     if( failed )
@@ -322,9 +323,9 @@ static BOOL MyEnumProcessModules( HANDLE hProcess, HMODULE *lphModule, DWORD cb,
     if( EnumProcessModulesPtr == NULL )
     {
         /* Windows 7 and newer versions have K32EnumProcessModules in Kernel32.dll which is always pre-loaded */
-        psapi = GetModuleHandleA( "Kernel32.dll" );
-        if( psapi != NULL )
-            EnumProcessModulesPtr = (BOOL (WINAPI *)(HANDLE, HMODULE *, DWORD, LPDWORD)) (LPVOID) GetProcAddress( psapi, "K32EnumProcessModules" );
+        kernel32 = GetModuleHandleA( "Kernel32.dll" );
+        if( kernel32 != NULL )
+            EnumProcessModulesPtr = (BOOL (WINAPI *)(HANDLE, HMODULE *, DWORD, LPDWORD)) (LPVOID) GetProcAddress( kernel32, "K32EnumProcessModules" );
 
         /* Windows Vista and older version have EnumProcessModules in Psapi.dll which needs to be loaded */
         if( EnumProcessModulesPtr == NULL )
@@ -332,13 +333,13 @@ static BOOL MyEnumProcessModules( HANDLE hProcess, HMODULE *lphModule, DWORD cb,
             /* Do not let Windows display the critical-error-handler message box */
             uMode = MySetErrorMode( SEM_FAILCRITICALERRORS );
             psapi = LoadLibraryA( "Psapi.dll" );
+            MySetErrorMode( uMode );
             if( psapi != NULL )
             {
                 EnumProcessModulesPtr = (BOOL (WINAPI *)(HANDLE, HMODULE *, DWORD, LPDWORD)) (LPVOID) GetProcAddress( psapi, "EnumProcessModules" );
                 if( EnumProcessModulesPtr == NULL )
                     FreeLibrary( psapi );
             }
-            MySetErrorMode( uMode );
         }
 
         if( EnumProcessModulesPtr == NULL )
