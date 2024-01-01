@@ -369,13 +369,13 @@ void *dlopen( const char *file, int mode )
          * symbol object must be provided. That object must be able to access
          * all symbols from the original program file, and any objects loaded
          * with the RTLD_GLOBAL flag.
-         * The return value from GetModuleHandle( ) allows us to retrieve
+         * The return value from GetModuleHandleA( ) allows us to retrieve
          * symbols only from the original program file. EnumProcessModules() is
          * used to access symbols from other libraries. For objects loaded
          * with the RTLD_LOCAL flag, we create our own list later on. They are
          * excluded from EnumProcessModules() iteration.
          */
-        hModule = GetModuleHandle( NULL );
+        hModule = GetModuleHandleA( NULL );
 
         if( !hModule )
             save_err_str( "(null)", GetLastError( ) );
@@ -468,7 +468,7 @@ int dlclose( void *handle )
     error_occurred = FALSE;
 
     /* dlopen(NULL, ...) does not call LoadLibrary(), so do not call FreeLibrary(). */
-    if( hModule == GetModuleHandle( NULL ) )
+    if( hModule == GetModuleHandleA( NULL ) )
         return 0;
 
     ret = FreeLibrary( hModule );
@@ -500,7 +500,7 @@ void *dlsym( void *handle, const char *name )
 
     symbol = NULL;
     hCaller = NULL;
-    hModule = GetModuleHandle( NULL );
+    hModule = GetModuleHandleA( NULL );
     dwMessageId = 0;
 
     if( handle == RTLD_DEFAULT )
@@ -553,7 +553,7 @@ void *dlsym( void *handle, const char *name )
 
         hCurrentProc = GetCurrentProcess( );
 
-        /* GetModuleHandle( NULL ) only returns the current program file. So
+        /* GetModuleHandleA( NULL ) only returns the current program file. So
          * if we want to get ALL loaded module including those in linked DLLs,
          * we have to use EnumProcessModules( ).
          */
