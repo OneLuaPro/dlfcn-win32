@@ -704,7 +704,7 @@ static BOOL is_valid_address( const void *addr )
     /* check valid pointer */
     result = VirtualQuery( addr, &info, sizeof( info ) );
 
-    if( result == 0 || info.AllocationBase == NULL || info.AllocationProtect == 0 || info.AllocationProtect == PAGE_NOACCESS )
+    if( result != sizeof( info ) || info.AllocationBase == NULL || info.State == MEM_FREE || info.State == MEM_RESERVE || info.Protect == 0 || info.Protect == PAGE_NOACCESS )
         return FALSE;
 
     return TRUE;
