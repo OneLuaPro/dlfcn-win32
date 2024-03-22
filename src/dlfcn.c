@@ -26,12 +26,12 @@
 
 #ifdef _DEBUG
 #define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
+#include <stdlib.h> /* malloc() and free() */
 #include <crtdbg.h>
 #endif
 #include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> /* malloc() and free() */
+#include <string.h> /* strlen() and memcpy() */
 
 /* Older versions do not have this type */
 #if _WIN32_WINNT < 0x0500
