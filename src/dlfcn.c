@@ -30,7 +30,6 @@
 #include <crtdbg.h>
 #endif
 #include <windows.h>
-#include <stdlib.h> /* malloc() and free() */
 #include <string.h> /* strlen() and memcpy() */
 
 /* Older versions do not have this type */
@@ -105,6 +104,24 @@ __declspec( naked ) static void *_ReturnAddress( void ) { __asm mov eax, [ebp+4]
 #define DLFCN_NOINLINE
 #endif
 
+static void *MyAlloc( size_t size )
+{
+#ifdef _DEBUG
+    return malloc( size );
+#else
+    return LocalAlloc( LPTR, size );
+#endif
+}
+
+static void MyFree( void *ptr )
+{
+#ifdef _DEBUG
+    free( ptr );
+#else
+    LocalFree( ptr );
+#endif
+}
+
 /* Note:
  * MSDN says these functions are not thread-safe. We make no efforts to have
  * any kind of thread safety.
@@ -149,7 +166,7 @@ static BOOL local_add( HMODULE hModule )
 
     for( pobject = &first_object; pobject->next; pobject = pobject->next );
 
-    nobject = (local_object *) malloc( sizeof( local_object ) );
+    nobject = (local_object *) MyAlloc( sizeof( local_object ) );
 
     if( !nobject )
         return FALSE;
@@ -179,7 +196,7 @@ static void local_rem( HMODULE hModule )
     if( pobject->previous )
         pobject->previous->next = pobject->next;
 
-    free( pobject );
+    MyFree( pobject );
 }
 
 /* POSIX says dlerror( ) doesn't have to be thread-safe, so we use one
@@ -568,7 +585,7 @@ void *dlsym( void *handle, const char *name )
          */
         if( MyEnumProcessModules( hCurrentProc, NULL, 0, &dwSize ) != 0 )
         {
-            modules = (HMODULE *) malloc( dwSize );
+            modules = (HMODULE *) MyAlloc( dwSize );
             if( modules )
             {
                 if( MyEnumProcessModules( hCurrentProc, modules, dwSize, &cbNeeded ) != 0 && dwSize == cbNeeded )
@@ -587,13 +604,13 @@ void *dlsym( void *handle, const char *name )
                         symbol = GetProcAddress( modules[i], name );
                         if( symbol != NULL )
                         {
-                            free( modules );
+                            MyFree( modules );
                             goto end;
                         }
                     }
 
                 }
-                free( modules );
+                MyFree( modules );
             }
             else
             {
