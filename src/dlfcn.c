@@ -61,7 +61,12 @@ typedef ULONG ULONG_PTR;
 
 #ifdef _MSC_VER
 #if _MSC_VER >= 1000
-/* https://docs.microsoft.com/en-us/cpp/intrinsics/returnaddress */
+/* https://docs.microsoft.com/en-us/cpp/intrinsics/returnaddress
+ * When compiling in C++ mode, it is required to have C declaration for _ReturnAddress.
+ */
+#ifdef __cplusplus
+extern "C" void *_ReturnAddress(void);
+#endif
 #pragma intrinsic( _ReturnAddress )
 #else
 /* On older version read return address from the value on stack pointer + 4 of
