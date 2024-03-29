@@ -36,6 +36,7 @@
 #include <io.h>
 #include <fcntl.h>
 #include <direct.h>
+#include <errno.h>
 #include "dlfcn.h"
 
 /* If these dlclose's fails, we don't care as the handles are going to be
