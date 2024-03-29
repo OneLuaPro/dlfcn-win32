@@ -30,7 +30,6 @@
 #include <crtdbg.h>
 #endif
 #include <windows.h>
-#include <string.h> /* strlen() and memcpy() */
 
 /* Older versions do not have this type */
 #if _WIN32_WINNT < 0x0500
@@ -210,19 +209,15 @@ static BOOL error_occurred;
 static void save_err_str( const char *str, DWORD dwMessageId )
 {
     DWORD ret;
-    size_t pos, len;
-
-    len = strlen( str );
-    if( len > sizeof( error_buffer ) - 5 )
-        len = sizeof( error_buffer ) - 5;
+    size_t pos, i;
 
     /* Format error message to:
      * "<argument to function that failed>": <Windows localized error message>
       */
     pos = 0;
     error_buffer[pos++] = '"';
-    memcpy( error_buffer + pos, str, len );
-    pos += len;
+    for( i = 0; i < sizeof( error_buffer ) - 5 && str[i] != '\0'; i++ )
+        error_buffer[pos++] = str[i];
     error_buffer[pos++] = '"';
     error_buffer[pos++] = ':';
     error_buffer[pos++] = ' ';
@@ -413,7 +408,11 @@ void *dlopen( const char *file, int mode )
         char lpFileName[MAX_PATH];
         size_t i, len;
 
-        len = strlen( file );
+        for( len = 0; ; len++ )
+        {
+            if( file[len] == '\0' )
+                break;
+        }
 
         if( len >= sizeof( lpFileName ) )
         {
