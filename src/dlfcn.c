@@ -242,7 +242,7 @@ static void save_err_ptr_str( const void *ptr, DWORD dwMessageId )
     for( i = 0; i < 2 * sizeof( ptr ); i++ )
     {
         num = (char) ( ( ( (ULONG_PTR) ptr ) >> ( 8 * sizeof( ptr ) - 4 * ( i + 1 ) ) ) & 0xF );
-        ptr_buf[2 + i] = num + ( ( num < 0xA ) ? '0' : ( 'A' - 0xA ) );
+        ptr_buf[2 + i] = (char) ( num + ( ( num < 0xA ) ? '0' : ( 'A' - 0xA ) ) );
     }
 
     ptr_buf[2 + 2 * sizeof( ptr )] = 0;
