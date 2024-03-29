@@ -70,7 +70,11 @@ typedef ULONG ULONG_PTR;
  * EBP register optimization. Read value of EBP + 4 via inline assembly. And
  * because inline assembly does not have a return value, put it into naked
  * function which does not have prologue and epilogue and preserve registers.
+ * When compiling in C++ mode, it is required to have C declaration for _alloca.
  */
+#ifdef __cplusplus
+extern "C" void *__cdecl _alloca(size_t);
+#endif
 __declspec( naked ) static void *_ReturnAddress( void ) { __asm mov eax, [ebp+4] __asm ret }
 #define _ReturnAddress( ) ( _alloca(1), _ReturnAddress( ) )
 #endif
