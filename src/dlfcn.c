@@ -291,7 +291,7 @@ static HMODULE MyGetModuleHandleFromAddress( const void *addr )
     if( !failed )
     {
         /* If GetModuleHandleExA is available use it with GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS */
-        if( !GetModuleHandleExAPtr( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, addr, &hModule ) )
+        if( !GetModuleHandleExAPtr( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCSTR) addr, &hModule ) )
             return NULL;
     }
     else
@@ -559,7 +559,7 @@ void *dlsym( void *handle, const char *name )
          */
         if( MyEnumProcessModules( hCurrentProc, NULL, 0, &dwSize ) != 0 )
         {
-            modules = malloc( dwSize );
+            modules = (HMODULE *) malloc( dwSize );
             if( modules )
             {
                 if( MyEnumProcessModules( hCurrentProc, modules, dwSize, &cbNeeded ) != 0 && dwSize == cbNeeded )
