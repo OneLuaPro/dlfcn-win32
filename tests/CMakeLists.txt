@@ -31,6 +31,4 @@ if(WIN32 AND NOT BUILD_SHARED_LIBS)
     endif()
 endif()
 
-install(TARGETS test-dladdr EXPORT dlfcn-win32-targets RUNTIME DESTINATION bin)
-
 add_test(NAME test-dladdr COMMAND test-dladdr WORKING_DIRECTORY $<TARGET_FILE_DIR:test-dladdr>)
