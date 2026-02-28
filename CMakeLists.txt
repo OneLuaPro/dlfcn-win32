@@ -1,4 +1,8 @@
-cmake_minimum_required(VERSION 2.8.11...3.10)
+cmake_minimum_required(VERSION 3.15)
+
+if(POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
 
 if (NOT DEFINED CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE Release CACHE STRING "Build type")
@@ -18,6 +22,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if (MSVC)
     add_compile_options(/W4)
+    if(CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM")
+        add_link_options("/NODEFAULTLIB:libmmd.lib")
+        link_libraries(libmmt.lib libircmt.lib)
+    endif()
 else()
     add_compile_options(-Wall)
 endif()
